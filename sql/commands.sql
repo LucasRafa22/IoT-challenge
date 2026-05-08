@@ -1,0 +1,8 @@
+CREATE DATABASE iot_pet;
+
+CREATE TABLE pet_saude (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  descricao VARCHAR(50),
+  status VARCHAR(20),
+  data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

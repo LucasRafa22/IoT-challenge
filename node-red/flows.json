@@ -1,0 +1,659 @@
+[
+    {
+        "id": "ea9d833410528300",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "66dd1c238c2735a6",
+        "type": "mqtt in",
+        "z": "ea9d833410528300",
+        "name": "",
+        "topic": "pet/temperatura",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "56f5d9945df90a76",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 200,
+        "y": 160,
+        "wires": [
+            [
+                "152799256aaba857",
+                "0ae4e392a620d882",
+                "457f805eeab2b90c"
+            ]
+        ]
+    },
+    {
+        "id": "3b0e361622634654",
+        "type": "mqtt in",
+        "z": "ea9d833410528300",
+        "name": "",
+        "topic": "pet/atividade",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "56f5d9945df90a76",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 190,
+        "y": 480,
+        "wires": [
+            [
+                "045e9cd20c62dcfe",
+                "87c6820adf2cf68d",
+                "0396c872ba0ac232"
+            ]
+        ]
+    },
+    {
+        "id": "0ae4e392a620d882",
+        "type": "function",
+        "z": "ea9d833410528300",
+        "name": "temperatura",
+        "func": "const temp = Number(msg.payload);\n\nif (isNaN(temp) || temp < 30 || temp > 45) {\n    node.warn(\"Leitura ignorada: Valor fora da escala biológica.\");\n    return null;\n}\n\nlet descricao = \"\";\nlet status = \"\";\n\nif (temp >= 39.5) {\n    descricao = \"Febre alta detectada\";\n    status = \"critico\";\n} \nelse if (temp >= 39.1) {\n    descricao = \"Temperatura levemente elevada\";\n    status = \"alerta\";\n} \nelse if (temp >= 37.5) {\n    descricao = \"Temperatura normal\";\n    status = \"ok\";\n} \nelse if (temp >= 36.0) {\n    descricao = \"Temperatura baixa (hipotermia leve)\";\n    status = \"alerta\";\n} \nelse {\n    descricao = \"Hipotermia grave\";\n    status = \"critico\";\n}\n\n\nlet msgSql = {\n    topic: `INSERT INTO pet_saude (descricao, status) VALUES ('${descricao} - ${temp}°C', '${status}')`\n};\n\n\nlet msgDash = {\n    payload: descricao,\n    statusCode: status,\n    value: temp \n};\n\nreturn [msgSql, msgDash];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 160,
+        "wires": [
+            [
+                "a6a47ed5023dc746"
+            ],
+            [
+                "c5e46c3ac4483f4d"
+            ]
+        ]
+    },
+    {
+        "id": "87c6820adf2cf68d",
+        "type": "function",
+        "z": "ea9d833410528300",
+        "name": "atividade",
+        "func": "const atividade = Number(msg.payload);\n\nif (isNaN(atividade) || atividade < 0 || atividade > 500) {\n    node.warn(`Atividade ignorada: ${atividade} está fora da escala (0-500).`);\n    return null;\n}\n\nlet descricao = \"\";\nlet status = \"\";\n\nif (atividade <= 10) {\n    descricao = \"Em repouso\";\n    status = \"ok\";\n} \nelse if (atividade <= 50) {\n    descricao = \"Movimento leve\";\n    status = \"ok\";\n} \nelse if (atividade <= 150) {\n    descricao = \"Atividade moderada\";\n    status = \"alerta\";\n} \nelse {\n    descricao = \"Atividade excessiva\";\n    status = \"critico\";\n}\n\n\nlet msgSql = {\n    topic: `INSERT INTO pet_saude (descricao, status) VALUES ('${descricao} - ${atividade}°C', '${status}')`\n};\n\n\nlet msgDash = {\n    payload: descricao, \n    descricao: descricao,\n    status: status\n\n};\n\nreturn [msgSql, msgDash];\n",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 480,
+        "wires": [
+            [
+                "459fdba4e6383ee6"
+            ],
+            [
+                "fe40b60cbfc2d9c4"
+            ]
+        ]
+    },
+    {
+        "id": "457f805eeab2b90c",
+        "type": "function",
+        "z": "ea9d833410528300",
+        "name": "function 1",
+        "func": "msg.payload = Number(msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 80,
+        "wires": [
+            [
+                "3ac5dd860dd061ed"
+            ]
+        ]
+    },
+    {
+        "id": "0396c872ba0ac232",
+        "type": "function",
+        "z": "ea9d833410528300",
+        "name": "function 2",
+        "func": "msg.payload = Number(msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 400,
+        "wires": [
+            [
+                "33b82961b07d10f7"
+            ]
+        ]
+    },
+    {
+        "id": "1f6e384997a5ebbf",
+        "type": "inject",
+        "z": "ea9d833410528300",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 190,
+        "y": 660,
+        "wires": [
+            [
+                "ac43eda93067fb5b"
+            ]
+        ]
+    },
+    {
+        "id": "facaae3ea09f064e",
+        "type": "function",
+        "z": "ea9d833410528300",
+        "name": "tabela de historico",
+        "func": "msg.payload = msg.payload.map(row => {\n\n    let cor = \"\";\n\n    if (row.status === \"critico\") cor = \"🔴\";\n    else if (row.status === \"alerta\") cor = \"🟡\";\n    else cor = \"🟢\";\n\n    return {\n        data: row.data_registro,\n        descricao: row.descricao,\n        status: cor + \" \" + row.status\n    };\n});\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 710,
+        "y": 660,
+        "wires": [
+            [
+                "71b49e9283660b21"
+            ]
+        ]
+    },
+    {
+        "id": "ac43eda93067fb5b",
+        "type": "function",
+        "z": "ea9d833410528300",
+        "name": "mysql tabela",
+        "func": "msg.topic = `\nSELECT \n  data_registro,\n  descricao,\n  status\nFROM pet_saude\nORDER BY data_registro DESC\nLIMIT 20\n`;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 660,
+        "wires": [
+            [
+                "491188ab9fb99fac"
+            ]
+        ]
+    },
+    {
+        "id": "d3078e5837437724",
+        "type": "http request",
+        "z": "ea9d833410528300",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://api.openweathermap.org/data/2.5/weather?q=Osasco&appid=ab61b0f9e8c275a98ddb16f9b76e78a7&units=metric&lang=pt_br",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 400,
+        "y": 760,
+        "wires": [
+            [
+                "50ab37567614512e"
+            ]
+        ]
+    },
+    {
+        "id": "50ab37567614512e",
+        "type": "function",
+        "z": "ea9d833410528300",
+        "name": "Preparar Prompt GenIA",
+        "func": "let temp = msg.payload.main.temp;\nlet clima = msg.payload.weather[0].description;\nlet cidade = msg.payload.name;\n\nlet mensagem = `🌎 ${cidade}\\n🌡️ ${temp}°C\\n☁️ ${clima}`;\n\nif (temp > 30) {\n    mensagem += \"\\n🔥 Muito quente!\";\n} else if (temp < 10) {\n    mensagem += \"\\n❄️ Muito frio!\";\n}\n\nmsg.payload = mensagem;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 760,
+        "wires": [
+            [
+                "3309a9690e754465"
+            ]
+        ]
+    },
+    {
+        "id": "5cc7ae87ad22afdc",
+        "type": "inject",
+        "z": "ea9d833410528300",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 760,
+        "wires": [
+            [
+                "d3078e5837437724"
+            ]
+        ]
+    },
+    {
+        "id": "a6a47ed5023dc746",
+        "type": "mysql",
+        "z": "ea9d833410528300",
+        "mydb": "cb0dc9ebce350b39",
+        "name": "",
+        "x": 630,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "459fdba4e6383ee6",
+        "type": "mysql",
+        "z": "ea9d833410528300",
+        "mydb": "cb0dc9ebce350b39",
+        "name": "",
+        "x": 630,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "491188ab9fb99fac",
+        "type": "mysql",
+        "z": "ea9d833410528300",
+        "mydb": "cb0dc9ebce350b39",
+        "name": "",
+        "x": 530,
+        "y": 660,
+        "wires": [
+            [
+                "facaae3ea09f064e"
+            ]
+        ]
+    },
+    {
+        "id": "71b49e9283660b21",
+        "type": "ui_table",
+        "z": "ea9d833410528300",
+        "group": "55729aca0595c36f",
+        "name": "",
+        "order": 0,
+        "width": "7",
+        "height": "10",
+        "columns": [],
+        "outputs": 0,
+        "cts": false,
+        "x": 910,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "c5e46c3ac4483f4d",
+        "type": "ui_text",
+        "z": "ea9d833410528300",
+        "group": "78892af94cd0b8db",
+        "order": 2,
+        "width": "6",
+        "height": "1",
+        "name": "",
+        "label": "Status: ",
+        "format": "{{msg.payload}}",
+        "layout": "row-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 640,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "fe40b60cbfc2d9c4",
+        "type": "ui_text",
+        "z": "ea9d833410528300",
+        "group": "5d2454f62135af04",
+        "order": 2,
+        "width": "6",
+        "height": "1",
+        "name": "",
+        "label": "Status: ",
+        "format": "{{msg.payload}}",
+        "layout": "row-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 640,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "3309a9690e754465",
+        "type": "ui_text",
+        "z": "ea9d833410528300",
+        "group": "b9fbce9b118361dd",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Clima Externo",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 860,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "152799256aaba857",
+        "type": "ui_gauge",
+        "z": "ea9d833410528300",
+        "name": "",
+        "group": "78892af94cd0b8db",
+        "order": 1,
+        "width": "6",
+        "height": "4",
+        "gtype": "gage",
+        "title": "Temperatura do Pet",
+        "label": "°C",
+        "format": "{{value}}",
+        "min": "30",
+        "max": "45",
+        "colors": [
+            "#00aaff",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 430,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "045e9cd20c62dcfe",
+        "type": "ui_gauge",
+        "z": "ea9d833410528300",
+        "name": "",
+        "group": "5d2454f62135af04",
+        "order": 1,
+        "width": "6",
+        "height": "4",
+        "gtype": "gage",
+        "title": "Atividade do pet",
+        "label": "",
+        "format": "{{value}}",
+        "min": "0",
+        "max": "500",
+        "colors": [
+            "#00aaff",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 420,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "3ac5dd860dd061ed",
+        "type": "ui_chart",
+        "z": "ea9d833410528300",
+        "name": "",
+        "group": "31fed98b9243d93f",
+        "order": 0,
+        "width": "5",
+        "height": "5",
+        "label": "Temperatura ao longo do tempo",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "auto",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 710,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "33b82961b07d10f7",
+        "type": "ui_chart",
+        "z": "ea9d833410528300",
+        "name": "",
+        "group": "31fed98b9243d93f",
+        "order": 0,
+        "width": "5",
+        "height": "5",
+        "label": "Atividade ao longo do tempo",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "auto",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 700,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "56f5d9945df90a76",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "broker.hivemq.com",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "cb0dc9ebce350b39",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "localhost",
+        "port": "3306",
+        "db": "iot_pet",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "55729aca0595c36f",
+        "type": "ui_group",
+        "name": "Histórico de Eventos",
+        "tab": "97ea2c85d50cf5d7",
+        "order": 1,
+        "disp": true,
+        "width": "7",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "78892af94cd0b8db",
+        "type": "ui_group",
+        "name": "Temperatura do Pet",
+        "tab": "97ea2c85d50cf5d7",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "5d2454f62135af04",
+        "type": "ui_group",
+        "name": "Atividade do Pet",
+        "tab": "97ea2c85d50cf5d7",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "b9fbce9b118361dd",
+        "type": "ui_group",
+        "name": "API",
+        "tab": "97ea2c85d50cf5d7",
+        "order": 5,
+        "disp": true,
+        "width": "9",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "31fed98b9243d93f",
+        "type": "ui_group",
+        "name": "Gráficos",
+        "tab": "97ea2c85d50cf5d7",
+        "order": 4,
+        "disp": true,
+        "width": "5",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "97ea2c85d50cf5d7",
+        "type": "ui_tab",
+        "name": "Monitoramento Pet",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "6deca9508bc50465",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-node-mysql": "3.0.0",
+            "node-red-node-ui-table": "0.4.5",
+            "node-red-dashboard": "3.6.6"
+        }
+    }
+]
